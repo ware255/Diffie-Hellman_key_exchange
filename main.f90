@@ -1,6 +1,6 @@
 !
-! Diffie-Hellmanéµäº¤æ›ãƒ—ãƒ­ã‚°ãƒ©ãƒ 
-! å‚è€ƒå‹•ç”»:https://youtu.be/XOn3dt0y8iE
+! Diffie-HellmanŒ®ŒğŠ·ƒvƒƒOƒ‰ƒ€
+! Ql“®‰æ:https://youtu.be/XOn3dt0y8iE
 !
 module dh
     implicit none
@@ -20,7 +20,7 @@ module dh
         module procedure r_shift
     end interface
 contains
-    ! Xorshiftä¹±æ•°ç”Ÿæˆ
+    ! Xorshift—”¶¬
     integer(8) function random(w)
         implicit none
         integer(8), intent(inout) :: w
@@ -32,7 +32,7 @@ contains
         random = w 
     end function random
 
-    subroutine Eratosthenes_sieve(rc)
+    subroutine init(rc)
         implicit none
         logical(8), allocatable :: sieve(:)
         integer(8) :: MAX = 10000000
@@ -57,7 +57,7 @@ contains
             end if
             tmp = tmp + 1
         end do
-        tmp = mod(random(t), MAX) + 1
+        tmp = mod(random(t), MAX / 100000) + 1
         do
             if (sieve(tmp)) then
                 rc%g = tmp
@@ -67,21 +67,21 @@ contains
         end do
         deallocate(sieve)
 
-        ! ã‚¢ãƒªã‚¹ã®ç§˜å¯†éµ
+        ! ƒAƒŠƒX‚Ì”é–§Œ®
         do
             rc%a = mod(random(t), MAX) + 1
             if (1 < rc%a .and. rc%a < rc%p - 2) then
                 exit
             end if
         end do
-        ! ãƒœãƒ–ã®ç§˜å¯†éµ
+        ! ƒ{ƒu‚Ì”é–§Œ®
         do
             rc%b = mod(random(t), MAX) + 1
             if (1 < rc%b .and. rc%b < rc%p - 2) then
                 exit
             end if
         end do
-    end subroutine Eratosthenes_sieve
+    end subroutine init
 
     integer(8) function nxor(a, b) result(c)
         implicit none
@@ -106,25 +106,28 @@ program main
     use dh
     implicit none
     type(dh_class) :: rc
-    call Eratosthenes_sieve(rc)
-    print '("\nç´ æ•°p, g       :", I0, ", ", I0)', rc%p, rc%g
+    ! ‰Šú‰»
+    call init(rc)
+    print '("\n‘f”p, g               :", I0, ", ", I0)', rc%p, rc%g
 
-    print '("\nã‚¢ãƒªã‚¹ã®ç§˜å¯†éµ :", I0)', rc%a
-    print '("ãƒœãƒ–ã®ç§˜å¯†éµ   :", I0)', rc%b
+    print '("\nƒAƒŠƒX‚Ìƒvƒ‰ƒCƒx[ƒgŒ® :", I0)', rc%a
+    print '("ƒ{ƒu‚Ìƒvƒ‰ƒCƒx[ƒgŒ®   :", I0)', rc%b
 
-    ! ç”Ÿæˆã•ã‚ŒãŸéµã‚’å–å¾—
+    ! ¶¬‚³‚ê‚½Œ®‚ğæ“¾
     rc%x = modPow(rc%g, rc%a, rc%p)
     rc%y = modPow(rc%g, rc%b, rc%p)
 
-    ! éµäº¤æ›å¾Œã®ç§˜å¯†éµã®ç”Ÿæˆ
+    ! Œ®ŒğŠ·Œã‚Ì”é–§Œ®‚Ì¶¬
     rc%at = modPow(rc%y, rc%a, rc%p)
     rc%bt = modPow(rc%x, rc%b, rc%p)
-    print '("\nã‚¢ãƒªã‚¹ã®éµ     :", I0)', rc%at
-    print '("ãƒœãƒ–ã®éµ       :", I0)', rc%bt
+    print '("\nƒAƒŠƒX‚Ì”é–§Œ®         :", I0)', rc%at
+    print '("ƒ{ƒu‚Ì”é–§Œ®           :", I0)', rc%bt
+
+    print '(A)', "\nPress Enter to exit."
 
     read *
 contains
-    ! ã¹ãå‰°ä½™
+    ! ‚×‚«è—]
     pure integer(8) function modPow(a, k, n)
         implicit none
         integer(8), intent(in) :: a, k, n
